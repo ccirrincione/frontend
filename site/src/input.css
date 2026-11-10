@@ -1,0 +1,97 @@
+@import "tailwindcss" source("../public");
+
+/* about/ has its own plain stylesheet, so keep its markup out of the Tailwind scan. */
+@source not "../public/about";
+
+@font-face {
+  font-family: "Krona One";
+  src: url("../fonts/krona-one-latin.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Variable subset covering 400 to 700, so the bold initials in the footer are real bold. */
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("../fonts/instrument-sans-latin-var.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Copy this block into app/src/routes/layout.css at swap time. */
+@theme {
+  --color-primary: #000000; /* page background */
+  --color-secondary: #ffffff; /* wordmark, headline, links */
+  --color-muted: #bdbdbd; /* status line, footer */
+  --color-line: #3d3d3d; /* rules and borders, if any */
+
+  --font-display: "Krona One", sans-serif; /* wordmark */
+  --font-body: "Instrument Sans", sans-serif;
+}
+
+/*
+  The horizon image is art-directed by aspect ratio. These must stay in step with the <source>
+  media queries in index.html. Portrait is the base; these two override it.
+*/
+@custom-variant art-land (@media (min-aspect-ratio: 1/1));
+@custom-variant art-wide (@media (min-aspect-ratio: 2/1));
+@custom-variant short (@media (max-height: 480px));
+
+/*
+  Only where the ball is reliably dark under the left text and light under the right text can
+  the footer sit directly on the image. Everywhere else it is solid black. The ranges come from
+  sampling the pixels behind the footer text: the landscape render needs a tall enough screen,
+  the wide render holds at any height until it gets wider than 13:5.
+*/
+@custom-variant footer-on-image {
+  @media (min-aspect-ratio: 3/2) and (max-aspect-ratio: 13/5) and (min-height: 481px) {
+    @slot;
+  }
+  @media (min-aspect-ratio: 2/1) and (max-aspect-ratio: 13/5) {
+    @slot;
+  }
+}
+
+/* From this ratio the left of the footer rides higher on the ball, so #d4d4d4 is not enough. */
+@custom-variant footer-bright (@media (min-aspect-ratio: 37/20));
+
+/*
+  "Learn more" under the headline: a slow highlight sweeps across muted text. Hover, focus and
+  reduced motion all drop to plain text.
+*/
+@utility shimmer {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-muted) 40%,
+    var(--color-secondary) 50%,
+    var(--color-muted) 60%
+  );
+  background-size: 250% 100%;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 3.2s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    background-image: none;
+    color: var(--color-muted);
+  }
+
+  &:hover,
+  &:focus-visible {
+    animation: none;
+    background-image: none;
+    color: var(--color-secondary);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
